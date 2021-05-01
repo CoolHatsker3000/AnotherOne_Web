@@ -92,7 +92,6 @@ public class TicketListContainer {
 
     }
 
-    //TODO:сделать нормальный список тикетов и создать здесь метод с квери
     public Ticket getTicketById(String id) {
         Query query=ref.orderByChild("id").equalTo(id);
         final Ticket[] result = new Ticket[1];

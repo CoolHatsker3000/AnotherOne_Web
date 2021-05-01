@@ -4,13 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Ticket {
-    public String name,description,id, uid;
-    public int status;
+    public String name,description,id, uid,mid;
+    public int status, ;
     public List<String> imageUrls;
     public String address;
     public double latitude,longitude;
 
-    public Ticket(String name, String description, String id,  String address, double latitude, double longitude) {
+    public Ticket(String name, String description, String id, String address, double latitude, double longitude) {
         this.name = name;
         this.description = description;
         this.id = id;
@@ -61,6 +61,14 @@ public class Ticket {
 
     public void setUid(String uid) {
         this.uid = uid;
+    }
+
+    public String getMid() {
+        return mid;
+    }
+
+    public void setMid(String mid) {
+        this.mid = mid;
     }
 
     public List<String> getImageUrls() {
