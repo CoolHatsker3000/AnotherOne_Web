@@ -27,6 +27,7 @@ public class TicketListController {
 
     @RequestMapping(value="/{ticketId}",method = RequestMethod.GET)
     public String getTicket(Model model, @PathVariable String ticketId){
+
         Ticket ticket=ticketListContainer.getTicketById(ticketId);
         model.addAttribute("ticket",ticket);
         List<Ticket> tickets=ticketListContainer.getTicketsList();

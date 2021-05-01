@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class TicketListContainer {
@@ -34,6 +36,32 @@ public class TicketListContainer {
 
     public List<Ticket> getTicketsList(){
         LinkedList<Ticket> tickets=new LinkedList<>();
+        Query query=ref.orderByChild("id");
+        CountDownLatch latch = new CountDownLatch(1);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot tick:dataSnapshot.getChildren()){
+                    tickets.add(tick.getValue(Ticket.class));
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return tickets;
+    }
+
+    public List<Ticket> getTicketsListOld(){
+        LinkedList<Ticket> tickets=new LinkedList<>();
         for (DataSnapshot users:ds.getChildren()){
             for (DataSnapshot ticket: users.getChildren()){
                 tickets.add(ticket.getValue(Ticket.class));
@@ -42,7 +70,7 @@ public class TicketListContainer {
         return tickets;
     }
 
-    public Ticket getTicketById(String id){
+    public Ticket getTicketByIdOld(String id){
         Ticket result;
         for (DataSnapshot users:ds.getChildren()){
             for (DataSnapshot ticket: users.getChildren()){
@@ -56,17 +84,35 @@ public class TicketListContainer {
         return null;
     }
 
-    public void changeTicketStatus(String ticketId, int status){
+    public void changeTicketStatus(String ticketId, int status) {
         Ticket ticket=getTicketById(ticketId);
         Map<String, Object> ticketUpdate = new HashMap<>();
         ticketUpdate.put(ticket.id+"/status",status);
-        ref.child(ticket.uid).updateChildrenAsync(ticketUpdate);//Value(status, new DatabaseReference.CompletionListener() {
+        ref.updateChildrenAsync(ticketUpdate);//Value(status, new DatabaseReference.CompletionListener() {
 
     }
 
     //TODO:сделать нормальный список тикетов и создать здесь метод с квери
-    public void getTicketByIdNew(String id){
-        return;
+    public Ticket getTicketById(String id) {
+        Query query=ref.orderByChild("id").equalTo(id);
+        final Ticket[] result = new Ticket[1];
+        CountDownLatch latch = new CountDownLatch(1);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                result[0]=dataSnapshot.child(id).getValue(Ticket.class);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return result[0];
     }
 
 }
